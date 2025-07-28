@@ -9,5 +9,6 @@
   },
   "action_hooks_ext": {
     "below_pass.selector_accuracy_at_1": "trigger:rewrite_phase"
-  }
+  },
+  "ci_minimum_score": 0.8
 }
