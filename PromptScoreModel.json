@@ -1,3 +1,13 @@
 {
-  "ci_minimum_score": 0.88
+  "add_metrics": [
+    { "name": "selector_accuracy_at_1", "weight": 0.2 }
+  ],
+  "thresholds_overrides": {
+    "pass": 0.8,
+    "warn": 0.6,
+    "fail": 0.4
+  },
+  "action_hooks_ext": {
+    "below_pass.selector_accuracy_at_1": "trigger:rewrite_phase"
+  }
 }
