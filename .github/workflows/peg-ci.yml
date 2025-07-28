@@ -6,15 +6,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with:
+          python-version: '3.11'
+          
       - name: Install dependencies
         run: pip install jsonschema pytest
+        
+      # --- START OF FIX ---
+      - name: Clean up incorrect directory structure
+        run: |
+          if [ -d "tests/tests" ]; then
+            echo "Incorrect nested 'tests/tests' directory found. Moving contents up and removing."
+            mv tests/tests/* tests/
+            rmdir tests/tests
+          fi
+      # --- END OF FIX ---
+      
       - name: Validate Repository Structure
         run: python validate_repo.py
+        
       - name: Run Scoring
         run: python run_scoring.py --model PromptScoreModel.json --out score.json
+        
       - name: Run Tests
         run: pytest -q tests/
+        
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
