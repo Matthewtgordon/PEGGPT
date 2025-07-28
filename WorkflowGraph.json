@@ -1,0 +1,114 @@
+{
+  "version": "1.2.2",
+  "description": "Defines core workflow execution graph for PEG sessions including prompt generation, fallback, and mutation chains.",
+  "nodes": [
+    {
+      "id": "intake",
+      "label": "Intake",
+      "type": "start",
+      "action": "load_tags,init_context,assign_roles"
+    },
+    {
+      "id": "prep",
+      "label": "Prep",
+      "type": "process",
+      "action": "load_json(Tasks.json),next_checklist,load_macros,load_rules"
+    },
+    {
+      "id": "build",
+      "label": "Build Prompt",
+      "type": "process",
+      "action": "build_prompt_logic,inject_constraints,assign_agents"
+    },
+    {
+      "id": "review",
+      "label": "Review & Score",
+      "type": "decision",
+      "action": "validate_prompt,score_output,log_mutation"
+    },
+    {
+      "id": "fallback",
+      "label": "Fallback Repair",
+      "type": "process",
+      "action": "auto_correct_prompt,revalidate,score_again"
+    },
+    {
+      "id": "external_call",
+      "label": "External API Call",
+      "type": "trigger",
+      "condition": "tag_present(#EXTERNAL_CALL)",
+      "action": "call_openai_chat"
+    },
+    {
+      "id": "export",
+      "label": "Wrap & Export",
+      "type": "end",
+      "action": "output_to_console,log_to_logbook,autoexport"
+    },
+    {
+      "id": "validate",
+      "label": "Validate Structure Pre-Mutation",
+      "type": "process",
+      "action": "validate_prompt_structure_before_mutation"
+    },
+    {
+      "id": "loop_detector",
+      "label": "Macro Loop Detector",
+      "type": "process",
+      "action": "detect_macro_loop"
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake",
+      "to": "prep"
+    },
+    {
+      "from": "prep",
+      "to": "build"
+    },
+    {
+      "from": "build",
+      "to": "review"
+    },
+    {
+      "from": "review",
+      "to": "fallback",
+      "condition": "validation_failed"
+    },
+    {
+      "from": "fallback",
+      "to": "review"
+    },
+    {
+      "from": "review",
+      "to": "external_call",
+      "condition": "tag_present(#EXTERNAL_CALL)"
+    },
+    {
+      "from": "review",
+      "to": "export",
+      "condition": "score_passed"
+    },
+    {
+      "from": "external_call",
+      "to": "export"
+    },
+    {
+      "from": "prep",
+      "to": "validate"
+    },
+    {
+      "from": "validate",
+      "to": "build"
+    },
+    {
+      "from": "build",
+      "to": "loop_detector"
+    },
+    {
+      "from": "loop_detector",
+      "to": "review"
+    }
+  ]
+}

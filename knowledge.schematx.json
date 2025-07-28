@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PEG Knowledge",
+  "type": "object",
+  "properties": {
+    "knowledge_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "topic": { "type": "string" },
+          "tag": { "type": "string" },
+          "tier": {
+            "type": "string",
+            "enum": [
+              "knowledge",
+              "rule",
+              "enforcement",
+              "meta",
+              "execution",
+              "safety",
+              "evaluation",
+              "procedure"
+            ],
+            "default": "knowledge"
+          },
+          "content": { "type": "string" }
+        },
+        "required": ["topic", "tag", "tier", "content"]
+      }
+    }
+  }
+}

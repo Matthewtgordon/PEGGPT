@@ -1,0 +1,43 @@
+{
+  "openai_chat": {
+    "endpoint": "https://api.openai.com/v1/chat/completions",
+    "method": "POST",
+    "auth": "Bearer <env:OPENAI_API_KEY>",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "schema": {
+      "model": "string",
+      "messages": "array",
+      "temperature": "number",
+      "max_tokens": "number"
+    },
+    "defaults": {
+      "temperature": 0.3,
+      "max_tokens": 4096
+    }
+  },
+  "github_api": {
+    "endpoint": "https://api.github.com",
+    "method": "GET",
+    "auth": "Bearer <env:GITHUB_PAT>",
+    "headers": {
+      "Accept": "application/vnd.github+json",
+      "Authorization": "Bearer <env:GITHUB_PAT>"
+    },
+    "schema": {
+      "path": "string",
+      "params": "object"
+    }
+  },
+  "github_write": {
+    "enabled": true,
+    "commit_on_mutation": true,
+    "default_branch": "main",
+    "commit_author": {
+      "name": "PEG System",
+      "email": "peg@autogen.local"
+    },
+    "auto_create_log_branch": true
+  }
+}

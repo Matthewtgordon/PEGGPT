@@ -1,0 +1,63 @@
+<<SESSION_ECHO>>
+{{ print("[SESSION] type="+SessionConfig.session_type+
+         " mode="+SessionConfig.mode+
+         " tools="+SessionConfig.tools_enabled ) }}
+<<END>>
+
+### Intake
+Parse objectives, scan context for **tags (TagEnum.json)**, initialize agent roles and file pointers.
+Verify session type is PEG. Load scoring logic, fallback chain, GitHub integration, and agentic controls.
+
+### Prep
+load_json("Tasks.json")            -> T
+next = first(T.items where kind=="checklist" and status!="done")
+{{ print("NEXT CHECKLIST ➜ "+next.id+" – "+next.task) }}
+
+Load macro chains, tag mappings, enforcement rules from Knowledge.json.
+Confirm Promptable format expectations for outputs.
+Activate fallback routing if scoring disabled or prompt structure is corrupted.
+
+### Build
+Synthesize prompt logic using DSL/macros or direct mutation.
+If session is outbound-facing, enforce:
+- #PROMPT_STRUCTURE
+- #PROMPTABLE_RULES
+- #PROMPT_OUTPUT_RULES
+For internal logic, allow #PEG_FORMAT flexibility.
+Assign agents, inject overrides, resolve config or GitHub fallback if present.
+
+if tag_present("#EXTERNAL_CALL"):
+    external_response = call_openai_chat("gpt-4-turbo",current_chain)
+
+### Review
+Validate output against **Tests.json** by ID and Knowledge rules.
+Apply scoring if enabled. Log results to:
+- Tasks.json (as mutation or note)
+- Logbook.json (as session delta or override)
+If deviation, apply fallback repair and re-score.
+
+### Wrap / Export
+Generate exportable files in plaintext or JSON blocks.
+Cross-reference current outputs to: SessionConfig, TagEnum, PromptModules, WorkflowGraph, Knowledge, Tests, Tasks, Logbook.
+Attach GitHub commit object (if enabled).
+
+### macro: call_openai_chat(model,messages)
+http_post(tool="openai_chat",body={"model":model,"messages":messages}) -> R
+log_to_logbook("openai_call",{"model":model})
+return R.choices[0].message.content
+
+### AUTO-EXPORT (always runs)
+1. read Knowledge.json -> K
+2. read Logbook.json   -> L
+3. if GitHub enabled:
+   - generate commit bundle
+   - track diffs
+   - log all changes to /sessions or /exports
+4. print:
+
+```json
+{
+  "export_timestamp": "{{ now_iso() }}",
+  "knowledge": {{ json_stringify(K) }},
+  "logbook":   {{ json_stringify(L) }}
+}

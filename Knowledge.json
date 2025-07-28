@@ -1,0 +1,192 @@
+{
+  "version": "v3.2.0",
+  "description": "PEG Knowledge.json \u2014 Persistent knowledge base for agentic reference, facts, and future expansion.",
+  "metadata": {
+    "created": "2024-04-27T01:40:00Z",
+    "updated_at": "2025-04-22T03:40:00-04:00",
+    "author": "PEG Orchestrator",
+    "consolidated": true
+  },
+  "knowledge_items": [
+    {
+      "topic": "Prompt Structure Pattern",
+      "tag": "#PROMPT_STRUCTURE",
+      "tier": "knowledge",
+      "content": "All prompt builds use hybrid format: lead-in objective/context, then structured (JSON, code, or DSL) logic."
+    },
+    {
+      "topic": "Fetch System Cap",
+      "tag": "#FETCH_LIMIT",
+      "tier": "knowledge",
+      "content": "8K character cap for Fetch-based prompts; 2\u20133K for standard routines."
+    },
+    {
+      "topic": "Execution Flag Rule",
+      "tag": "#EMULATED_ONLY",
+      "tier": "execution",
+      "content": "Code blocks are emulated for logic/structure, not for direct execution."
+    },
+    {
+      "topic": "Project Tags",
+      "tag": "#PROJECT_TAGS",
+      "tier": "meta",
+      "content": "Tags enable recall triggers (PEG, Translator, DEV, AI, etc.)."
+    },
+    {
+      "topic": "Validation Rules",
+      "tag": "#PROMPT_VALIDATION",
+      "tier": "enforcement",
+      "content": "Prompt auto-cleanup, collapse, or reformat enforced at each multi-phase step."
+    },
+    {
+      "topic": "Common Folders",
+      "tag": "#FOLDER_MAP",
+      "tier": "meta",
+      "content": "Active context folders: Projects/Folder/DEV, Projects/Folder/PEG, etc."
+    },
+    {
+      "topic": "Memory Testing Methodology",
+      "tag": "#MEMTEST_GUIDE",
+      "tier": "procedure",
+      "content": "Guides memory experiments and expected logic across session handoff."
+    },
+    {
+      "topic": "Timestamp Rule",
+      "tag": "#TIMESTAMP_ENFORCE",
+      "tier": "enforcement",
+      "content": "Enforces UTS #35 timestamp for all messages/files (see Bio_A requirements)."
+    },
+    {
+      "topic": "Mutation Audit",
+      "tag": "#MUTATION_AUDIT",
+      "tier": "enforcement",
+      "content": "Every file and macro change must be logged for audit and rollback capability."
+    },
+    {
+      "topic": "PEG Format Exception",
+      "tag": "#PEG_FORMAT",
+      "tier": "knowledge",
+      "content": "PEG\u2019s own system files are built using whatever structure provides best performance and precision\u2014hybrid Promptable is NOT required for PEG self-bootstrapping. All user-facing outputs default to hybrid Promptable unless instructed otherwise."
+    },
+    {
+      "topic": "GitHub Bootstrapping",
+      "tag": "#GITHUB_BOOTSTRAP",
+      "tier": "meta",
+      "content": "PEG may load PromptEngineer.txt or system logic from GitHub if bootstrapping is enabled and session format is undefined."
+    },
+    {
+      "topic": "Cloud Recovery",
+      "tag": "#CLOUD_RECOVERY",
+      "tier": "safety",
+      "content": "In the event of memory loss or config corruption, PEG may reinitialize from any version-tagged PromptEngineer.txt stored in GitHub or in a local recovery bundle."
+    },
+    {
+      "topic": "Scoring System",
+      "tag": "#SCORING_RULES",
+      "tier": "evaluation",
+      "content": "Prompt outputs must be scored based on clarity, obedience, format, and override-respect. Scores are tracked per session and logged."
+    }
+  ],
+  "self_learning": {
+    "mode": "hybrid",
+    "available_methods": [
+      {
+        "name": "Deterministic Log-Based",
+        "description": "Manually tracks violations, overrides, and mutations into log files. Behavior adjusts based on human feedback.",
+        "used_in": [
+          "Tasks.json",
+          "Logbook.json"
+        ],
+        "strengths": [
+          "Transparent",
+          "Easy to audit"
+        ],
+        "weaknesses": [
+          "Manual",
+          "No scoring",
+          "No adaptation unless prompted"
+        ]
+      },
+      {
+        "name": "Metric Evaluation Scoring",
+        "description": "Uses quantitative KPIs (e.g. schedule coverage %, hours variance, rule compliance rate) to evaluate and improve output logic.",
+        "used_in": [
+          "Evaluation agents",
+          "Simulated scoring pipelines"
+        ],
+        "strengths": [
+          "Adaptive",
+          "Error-resistant",
+          "Pattern-learning"
+        ],
+        "weaknesses": [
+          "Opaque logic",
+          "Requires safeguards"
+        ]
+      }
+    ],
+    "scheduler_mode": "Metric Evaluation Scoring",
+    "auto_expand_on_run": true,
+    "notes": [
+      "On each execution, the scheduler prompt should auto-query new developments in LLM-based self-learning or evaluation scoring.",
+      "PEG should track performance variance over time to aid in prompt refinement."
+    ],
+    "future_tests": [
+      "score_comparison",
+      "violation_rate_tracking",
+      "learning_curve_stability"
+    ]
+  },
+  "peg_prompt": {
+    "self_learning": {
+      "mode": "hybrid",
+      "available_methods": [
+        {
+          "name": "Deterministic Log-Based",
+          "description": "Manually tracks violations, overrides, and mutations into log files. Behavior adjusts based on human feedback.",
+          "used_in": [
+            "Tasks.json",
+            "Logbook.json"
+          ],
+          "strengths": [
+            "Transparent",
+            "Easy to audit"
+          ],
+          "weaknesses": [
+            "Manual",
+            "No scoring",
+            "No adaptation unless prompted"
+          ]
+        },
+        {
+          "name": "Metric Evaluation Scoring",
+          "description": "Uses quantitative KPIs (e.g. schedule coverage %, hours variance, rule compliance rate) to evaluate and improve output logic.",
+          "used_in": [
+            "Evaluation agents",
+            "Simulated scoring pipelines"
+          ],
+          "strengths": [
+            "Adaptive",
+            "Error-resistant",
+            "Pattern-learning"
+          ],
+          "weaknesses": [
+            "Opaque logic",
+            "Requires safeguards"
+          ]
+        }
+      ],
+      "scheduler_mode": "Metric Evaluation Scoring",
+      "auto_expand_on_run": true,
+      "notes": [
+        "On each execution, the scheduler prompt should auto-query new developments in LLM-based self-learning or evaluation scoring.",
+        "PEG should track performance variance over time to aid in prompt refinement."
+      ],
+      "future_tests": [
+        "score_comparison",
+        "violation_rate_tracking",
+        "learning_curve_stability"
+      ]
+    }
+  }
+}

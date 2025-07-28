@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PEG Knowledge Schema v2.0",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^v?\\d+\\.\\d+\\.\\d+$"
+    },
+    "knowledge_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "topic":   { "type": "string" },
+          "tag":     { "type": "string" },
+          "tier":    { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["id", "topic", "tag", "content"]
+      }
+    }
+  },
+  "required": ["version", "knowledge_items"]
+}
