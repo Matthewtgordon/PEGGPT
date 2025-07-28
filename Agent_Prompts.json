@@ -1,0 +1,36 @@
+[
+  {
+    "title": "Evaluate DSL Macro Adoption",
+    "system_hint": "Use Agent_Research_Instructions.txt",
+    "user": "Research Cycle: Evaluate adopting the DSL directive [DIRECTIVE_NAME] into PEG's Review phase. Compare against current behavior. Return a ResearchBrief.json and an RFC proposal that includes tests to add to PromptTests.json and pass/fail criteria tied to our scoring model.",
+    "placeholders": [
+      "DIRECTIVE_NAME"
+    ]
+  },
+  {
+    "title": "Selector Tuning Strategy",
+    "system_hint": "Use Agent_Research_Instructions.txt",
+    "user": "Research Cycle: Assess lightweight selector tuning strategies for macro choice. Focus on reducing oscillations and improving clarity without regressions. Produce a ResearchBrief.json and an RFC with a small, safe trial plan and rollback.",
+    "placeholders": []
+  },
+  {
+    "title": "Versioning & Changelog Discipline",
+    "system_hint": "Use Agent_Research_Instructions.txt",
+    "user": "Research Cycle: Compare version bump policies and conflict-aware merge patterns suitable for Knowledge.json and Rules.json. Propose an RFC with merge semantics, example diffs, and tests that assert changelog entries are created on mutation.",
+    "placeholders": []
+  },
+  {
+    "title": "Loop Guard for Macro Selection",
+    "system_hint": "Use Agent_Research_Instructions.txt",
+    "user": "Research Cycle: Evaluate a loop guard for repeated macro selection with no improvement across N cycles. Provide an RFC with measurable thresholds, a test harness sketch, and a plan to log to PromptDiff.json when the guard triggers.",
+    "placeholders": [
+      "N"
+    ]
+  },
+  {
+    "title": "CI Gate via GitHub Actions",
+    "system_hint": "Use Agent_Research_Instructions.txt",
+    "user": "Research Cycle: Draft a minimal GitHub Actions workflow that runs validate_repo.py, a scoring step, and required tests. Return an RFC including the YAML, pass/fail gate logic, and artifact outputs.",
+    "placeholders": []
+  }
+]
