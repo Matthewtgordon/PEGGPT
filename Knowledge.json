@@ -1,9 +1,9 @@
 {
-  "version": "3.3.6",
+  "version": "3.3.7",
   "description": "PEG Knowledge.json — Persistent knowledge base for agentic reference, facts, and future expansion.",
   "metadata": {
     "created_at": "2024-04-27T01:40:00+00:00",
-    "updated_at": "2025-07-30T05:15:00+00:00",
+    "updated_at": "2025-07-30T05:20:00+00:00",
     "author": "PEG Orchestrator",
     "consolidated": true,
     "operation_log": [
@@ -98,6 +98,13 @@
       "tag": "#SCORING_RULES",
       "tier": "evaluation",
       "content": "Prompt outputs must be scored based on clarity, obedience, format, and override-respect. Scores are tracked per session and logged."
+    },
+    {
+      "id": "a1a1a1a1-b2b2-c3c3-d4d4-e5e5e5e5e5e5",
+      "topic": "AI Assistant Onboarding Protocol",
+      "tag": "#META_GUIDE",
+      "tier": "procedure",
+      "content": "As an AI assistant working on this project, you must adhere to the conventions defined in the README.md. Key principles include: 1) WorkflowGraph.json is the source of truth for orchestration. 2) All changes are validated by the CI pipeline defined in .github/workflows/peg-ci.yml. 3) Secrets are referenced via <env:VAR> syntax. 4) Placeholders in Agent_Prompts.json are denoted by [PLACEHOLDER_NAME]."
     }
   ]
 }
