@@ -88,6 +88,40 @@ The script exits with a non-zero status if validation fails.
 
 The repository includes a helper script `run_scoring.py` that reads a scoring model and outputs a JSON report. Use it by providing a model file and an output location:
 
+
+Onboarding Guide for AI Assistants
+This document outlines the core conventions and architecture of the PEG (Promptable Engineer GPT) project. Adherence to these principles is required for all development.
+
+1. Core Philosophy
+The PEG system is a "builder of tools." Its primary function is to orchestrate other agents and systems to produce high-quality, structured outputs. It operates on a principle of "evidence-based adoption," meaning all changes must be validated against tests (Tests.json) and quality metrics (PromptScoreModel.json) before being accepted.
+
+2. Key File Conventions
+WorkflowGraph.json: The single source of truth for agent orchestration. It defines the nodes (steps) and edges (transitions) of any process.
+
+Knowledge.json: The agent's active memory. Contains facts, principles, and rules the agent must follow.
+
+Rules.json: A subset of knowledge that defines strict, non-negotiable enforcement policies.
+
+Logbook.json / Journal.json: The historical record. Logbook.json is for automated, machine-generated audit entries. Journal.json is for human-readable narrative and context.
+
+/src/ directory: Contains the Python code that acts as the "brain" or execution engine for the agent.
+
+3. Placeholder and Secret Conventions
+Placeholders in Agent_Prompts.json: Prompts stored in this file use bracketed, uppercase placeholders (e.g., [DIRECTIVE_NAME]). When using one of these prompts, you must replace the placeholder with the appropriate value.
+
+Secrets in Configuration: API keys and other secrets are never stored directly in files. They are referenced using the format <env:SECRET_NAME> (e.g., <env:OPENAI_API_KEY>). The execution environment is responsible for substituting these placeholders with actual secrets.
+
+4. The CI/CD Pipeline (peg-ci.yml)
+All commits are subject to an automated validation pipeline that:
+
+Ensures all required files exist and are valid JSON (validate_repo.py).
+
+Runs a suite of behavioral tests (pytest).
+
+Scores the output against a quality model (run_scoring.py).
+
+A commit will fail if any of these checks do not pass. Your primary goal is to ensure the CI pipeline is always passing.
+
 ```bash
 python run_scoring.py --model PromptScoreModel.json --out score.json
 ```
