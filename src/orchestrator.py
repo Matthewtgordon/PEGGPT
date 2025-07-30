@@ -7,14 +7,13 @@
 import json
 from pathlib import Path
 import time
-import random # PATCH: Added missing import for random
-from datetime import datetime # PATCH: Added import for ISO timestamps
+from datetime import datetime
 
 # Import the learning and safety modules
 from bandit_selector import choose_macro
 from loop_guard import detect_loop
-# We will import the main scoring function from run_scoring.py
-# from run_scoring import calculate_final_score # (Assumes run_scoring is updated to provide this)
+# TODO: Refactor run_scoring.py to be importable, then uncomment the line below
+# from run_scoring import calculate_final_score
 
 class Orchestrator:
     """
@@ -37,6 +36,16 @@ class Orchestrator:
             "loop_iterations": 0
         }
         print(f"Orchestrator initialized. Starting at node: '{self.state['current_node']}'")
+
+    def _get_simulated_score(self, output):
+        """
+        Placeholder for the real scoring function.
+        Once run_scoring.py is refactored, this will be replaced.
+        """
+        print("NOTE: Using simulated scoring.")
+        # In a real run, this would call: return calculate_final_score(output)
+        import random
+        return random.uniform(0.7, 1.0)
 
     def get_node_details(self, node_id: str):
         """Finds the full details for a node by its ID in the graph."""
@@ -68,39 +77,31 @@ class Orchestrator:
 
             print(f"\n--- Executing Node: {node.get('label', node['id'])} ---")
             
-            # --- Execute the action for the current node ---
-            # This is where the logic for each step (intake, build, review, etc.) would go.
-            # For this example, we'll simulate the actions.
-            
-            action_result = "success" # Default result
-            
+            action_result = "success"
+            chosen_macro_for_history = None # Variable to hold the chosen macro for logging
+
             if node['id'] == 'build':
-                # In the build step, we use the bandit selector to choose a macro
                 available_macros = self.config.get('macros', [])
                 chosen_macro = choose_macro(available_macros, self.state['history'])
+                chosen_macro_for_history = chosen_macro # Store for logging
                 print(f"Chosen Macro: '{chosen_macro}'")
-                # Simulate the output of the build process
                 self.state['output'] = f"Output from {chosen_macro}"
                 self.state['loop_iterations'] += 1
 
             elif node['id'] == 'review':
-                # In the review step, we score the output
-                # In a real run, this would call the scoring script on self.state['output']
-                # score = calculate_final_score(self.state['output']) # Example call
-                score = random.uniform(0.7, 1.0) # Simulate a score
+                # PATCH: Replaced direct random call with the placeholder scoring function.
+                score = self._get_simulated_score(self.state['output'])
                 self.state['last_score'] = score
                 print(f"Scoring complete. Score: {score:.2f}")
 
-                # Based on the score, we determine if validation passed or failed
                 pass_threshold = self.config.get('ci', {}).get('minimum_score', 0.8)
                 if score >= pass_threshold:
                     action_result = "score_passed"
-                    self.state['loop_iterations'] = 0 # Reset loop counter on success
+                    self.state['loop_iterations'] = 0
                 else:
                     action_result = "validation_failed"
 
             elif node['id'] == 'loop_detector':
-                # The loop detector checks if we are stuck in a build->review loop
                 is_looping = detect_loop(
                     self.state['history'],
                     N=self.config.get('loop_guard', {}).get('N', 3),
@@ -113,18 +114,19 @@ class Orchestrator:
                  print("✅ Workflow complete. Exporting results.")
                  action_result = "__end__"
 
-            # --- Find the next node based on the action's result ---
             next_node_id = self.get_next_node(node['id'], action_result)
-            self.state["current_node"] = next_node_id
             
-            # Update history for the learning modules
-            self.state['history'].append({
+            history_entry = {
                 'node': node['id'],
                 'result': action_result,
                 'score': self.state['last_score'],
-                # PATCH: Changed to ISO format to comply with UTS #35 rule
                 'timestamp': datetime.now().isoformat()
-            })
+            }
+            if chosen_macro_for_history:
+                history_entry['macro'] = chosen_macro_for_history
+            self.state['history'].append(history_entry)
+            
+            self.state["current_node"] = next_node_id
             
             if not self.state["current_node"]:
                 print(f"--- No further path from node '{node['id']}' with condition '{action_result}'. Halting. ---")
