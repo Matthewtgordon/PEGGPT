@@ -8,7 +8,7 @@
     { "id": "CHK-004", "task": "WorkflowGraph.json in place", "status": "done",   "kind": "checklist" },
     { "id": "CHK-005", "task": "SessionConfig tools ON",      "status": "done",   "kind": "checklist" },
     { "id": "CHK-006", "task": "debug_mode enabled",          "status": "done",   "kind": "checklist" },
-    { "id": "CHK-007", "task": "Fresh session verification",  "status": "todo",   "kind": "checklist" },
+    { "id": "CHK-007", "task": "Fresh session verification",  "status": "done",   "kind": "checklist" },
     { "id": "T005",    "task": "Consolidate legacy prompt rules into Knowledge.json format", "status": "active", "kind": "note" },
     { "id": "T006",    "task": "Finish export and version-stamp all system files",           "status": "active", "kind": "checklist" },
 
