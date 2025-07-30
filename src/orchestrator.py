@@ -82,14 +82,18 @@ class Orchestrator:
 
             if node['id'] == 'build':
                 available_macros = self.config.get('macros', [])
-                chosen_macro = choose_macro(available_macros, self.state['history'])
+                # PATCH: The call to choose_macro now correctly passes the config object.
+                chosen_macro = choose_macro(
+                    available_macros,
+                    self.state['history'],
+                    self.config
+                )
                 chosen_macro_for_history = chosen_macro # Store for logging
                 print(f"Chosen Macro: '{chosen_macro}'")
                 self.state['output'] = f"Output from {chosen_macro}"
                 self.state['loop_iterations'] += 1
 
             elif node['id'] == 'review':
-                # PATCH: Replaced direct random call with the placeholder scoring function.
                 score = self._get_simulated_score(self.state['output'])
                 self.state['last_score'] = score
                 print(f"Scoring complete. Score: {score:.2f}")
