@@ -27,7 +27,6 @@ jobs:
           python-version: '3.11'
 
       # Step 3: Install dependencies and expose secrets
-      # CORRECTION: Added env block to securely provide API keys to the workflow
       - name: Install Dependencies
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -41,9 +40,9 @@ jobs:
         run: python validate_repo.py
 
       # Step 5: Run the scoring model to evaluate prompt quality
-      # CORRECTION: Temporarily removed the --input flag until run_scoring.py is updated to handle it.
+      # CORRECTION: Added the required --input argument with a placeholder file.
       - name: Run Scoring
-        run: python run_scoring.py --model PromptScoreModel.json --out score.json
+        run: python run_scoring.py --model PromptScoreModel.json --input README.md --out score.json
 
       # Step 6: Run the automated test suite and generate a JUnit XML report
       - name: Run Tests
