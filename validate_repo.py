@@ -55,7 +55,7 @@ def main():
     """Main validation function to run all checks."""
     print("--- Running Repository Validation ---")
     
-    # CORRECTION: Removed 'Workflows.json' as it has been consolidated into WorkflowGraph.json
+    # CORRECTION: Added Modules.json to the list of required files.
     repo_files = [
         'Knowledge.json',
         'Rules.json',
@@ -67,7 +67,8 @@ def main():
         'Tests.json',
         'Journal.json',
         'PromptScoreModel.json',
-        'PromptModules.json'
+        'PromptModules.json',
+        'Modules.json'
     ]
     
     all_valid = True
