@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "PEG Knowledge Schema v3.1",
+  "title": "PEG Knowledge Schema v3.2",
   "description": "Defines the structure for the agent's persistent knowledge base, including metadata for auditing and versioning.",
   "type": "object",
   "properties": {
@@ -36,7 +36,10 @@
             "properties": {
               "timestamp": { "type": "string", "format": "date-time" },
               "operation": { "type": "string" },
-              "item_id": { "type": "string", "nullable": true }
+              "item_id": {
+                "description": "The ID of the item that was operated on, or null for global operations.",
+                "type": ["string", "null"]
+              }
             },
             "required": ["timestamp", "operation", "item_id"],
             "additionalProperties": false
