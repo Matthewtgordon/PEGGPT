@@ -1,8 +1,7 @@
 {
   "version": "3.3.1",
-  "description": "PEG Knowledge.json — Persistent knowledge base for agentic reference, facts, and future expansion.",
   "metadata": {
-    "created": "2024-04-27T01:40:00+00:00",
+    "created_at": "2024-04-27T01:40:00+00:00",
     "updated_at": "2025-07-30T04:03:00-04:00",
     "author": "PEG Orchestrator",
     "consolidated": true
@@ -26,7 +25,7 @@
       "id": "7f8b3c4a-12c4-11ef-9264-0242ac120002",
       "topic": "Execution Flag Rule",
       "tag": "#EMULATED_ONLY",
-      "tier": "execution",
+      "tier": "enforcement",
       "content": "Code blocks are emulated for logic/structure, not for direct execution."
     },
     {
