@@ -40,3 +40,11 @@
     "placeholders": []
   }
 ]
+{
+  "title": "Generate Logbook/Journal Entry",
+  "system_hint": "Generate a new entry for a log file. The output must be a single, clean JSON object, without any surrounding text, ready for automated appending.",
+  "user": "Based on our last interaction, create a new entry for the 'changelog' in 'Logbook.json'. The event was: [EVENT_DESCRIPTION]. Format the output as a single JSON object with 'timestamp' and 'event' keys.",
+  "placeholders": [
+    "EVENT_DESCRIPTION"
+  ]
+}
