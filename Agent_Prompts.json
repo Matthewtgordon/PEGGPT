@@ -32,5 +32,11 @@
     "system_hint": "Use Agent_Research_Instructions.txt",
     "user": "Research Cycle: Draft a minimal GitHub Actions workflow that runs validate_repo.py, a scoring step, and required tests. Return an RFC including the YAML, pass/fail gate logic, and artifact outputs.",
     "placeholders": []
+  },
+  {
+    "title": "Archived Tool: GitHub Commit",
+    "system_hint": "This module defines the API call for committing files to GitHub. It is archived here for future use in environments that support direct API writes, such as a dedicated server-side agent.",
+    "user": "{\n  \"github_commit\": {\n    \"endpoint\": \"https://api.github.com/repos/{repo}/contents/{path}\",\n    \"method\": \"PUT\",\n    \"auth\": \"Bearer <env:GITHUB_PAT>\",\n    \"headers\": { \"Accept\": \"application/vnd.github+json\" },\n    \"schema\": {\n      \"repo\": \"string\",\n      \"path\": \"string\",\n      \"message\": \"string\",\n      \"content\": \"string\",\n      \"branch\": \"string\",\n      \"sha\": \"string\"\n    }\n  }\n}",
+    "placeholders": []
   }
 ]
