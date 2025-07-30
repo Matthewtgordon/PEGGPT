@@ -1,0 +1,58 @@
+{
+  "version": "v4.0.0",
+  "source": "Old_Rules.json + PEG schema + DSL updates",
+  "global_rules": [
+    {
+      "rule": "Prompt must maintain modular workflow structure.",
+      "description": "All prompts should follow a clear multi-phase flow: Intake \u2192 Prep \u2192 Build \u2192 Review \u2192 Wrap."
+    },
+    {
+      "rule": "Fallback logic must be preserved and dynamically linked.",
+      "description": "Missing file or input conditions should activate embedded fallback routines."
+    },
+    {
+      "rule": "Total character count must stay under 8,000 characters.",
+      "description": "This includes the entire runtime payload; trigger summarization if near limit."
+    },
+    {
+      "rule": "Mutations must be logged and versioned.",
+      "description": "All DSL-driven mutations are to be recorded in PromptDiff.json and versioned in Changelog.json."
+    },
+    {
+      "rule": "PromptScoreModel must be enforced.",
+      "description": "If a score falls below 0.8, rewrite is triggered unless override is engaged."
+    },
+    {
+      "rule": "TagMap.json must be respected for execution routing.",
+      "description": "All steps must route through their appropriate tags as defined in TagMap."
+    }
+  ],
+  "prompt_specific_rules": [
+    {
+      "prompt": "Communicator",
+      "rule": "Maintain tone integrity during summarization.",
+      "description": "Reduce verbosity while preserving emotional and stylistic cues."
+    },
+    {
+      "prompt": "Lee",
+      "rule": "Detect emotional shifts and mixed tone inputs.",
+      "description": "Clarify or log tone conflicts; escalate if clarity cannot be restored."
+    },
+    {
+      "prompt": "Fallback Mechanisms",
+      "rule": "Trigger auto-commit to 'blocked' on timeout or unresolved state.",
+      "description": "Unrecoverable states should escalate to Notes.json with status flagged."
+    }
+  ],
+  "workflow_refinement_process": {
+    "initial_validation": "Check prompt against Examples.json and Edge_Cases.json before activation.",
+    "feedback_integration": "Incorporate user corrections or feedback from Notes.json when refining prompts.",
+    "iterative_improvement": "Test iteratively using sandbox prompts and track deltas in PromptDiff.json."
+  },
+  "automated_refinement_process": {
+    "self_learning": true,
+    "versioning_and_changelog": true,
+    "score_enforcement_active": true,
+    "mutation_guard_enabled": true
+  }
+}
