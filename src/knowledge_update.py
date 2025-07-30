@@ -1,19 +1,17 @@
 #
 # This script provides a class-based system for programmatically managing
-# the Knowledge.json file. It allows for structured, auditable updates by
-# ingesting "fragments" of new information, handling versioning, and
-# maintaining a history log. This is intended for use by server-side agents
-# or automated workflows.
+# the Knowledge.json file. It is aligned with the official schemas/knowledge.schema.json.
+# It allows for structured, auditable updates by ingesting "fragments" of new
+# information into the 'knowledge_items' list.
 #
 import json
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime, timezone
 from typing import List, Dict, Any
+import jsonschema
 
 # --- Utility Functions (Placeholders) ---
-# These would typically live in a shared 'utils.py' file.
-
 def json_load(path: Path):
     """Loads a JSON file with error handling."""
     with path.open('r', encoding='utf-8') as f:
@@ -28,141 +26,133 @@ def utcnow_iso():
     """Returns the current UTC time in ISO 8601 format."""
     return datetime.now(timezone.utc).isoformat()
 
-def days_between(d1_str: str, d2_str: str) -> int:
-    """
-    Calculates the number of days between two ISO date strings.
-    NOTE: Currently unused, reserved for future pruning logic.
-    """
-    try:
-        d1 = datetime.fromisoformat(d1_str.replace('Z', '+00:00'))
-        d2 = datetime.fromisoformat(d2_str.replace('Z', '+00:00'))
-        return abs((d1 - d2).days)
-    except (ValueError, TypeError):
-        return float('inf') # Return a large number if dates are invalid
-
 # --- Core KnowledgeStore Class ---
 
 class KnowledgeStore:
     """
-    Maintains master knowledge.json. Provides deterministic ingest and pruning.
-    All session outputs produce 'fragments' appended to knowledge.json via ingest().
+    Maintains the master Knowledge.json file according to the defined schema.
     """
-    def __init__(self, path: str = "Knowledge.json"):
+    def __init__(self, path: str = "Knowledge.json", schema_path: str = "schemas/knowledge.schema.json"):
         self.path = Path(path)
+        self.schema_path = Path(schema_path)
         self.store = self._load()
 
     def _load(self):
-        """Loads the knowledge store from the specified path."""
+        """Loads the knowledge store or creates a valid default structure."""
         if self.path.exists():
             return json_load(self.path)
-        # PATCH: Harmonized default key to "metadata" to match save()
         return {
             "version": "1.0.0",
-            "metadata": {"retention_policy": {}},
-            "goals": [], "ideas": [], "projects": [], "memory_blocks": [],
-            "state": {}, "history": []
+            "metadata": {},
+            "knowledge_items": []
         }
 
+    def _validate_store(self) -> bool:
+        """Validates the current store against the schema."""
+        if not self.schema_path.exists():
+            print(f"Warning: Schema file not found at {self.schema_path}. Cannot validate.")
+            return True # Don't fail if schema is missing
+        try:
+            schema = json_load(self.schema_path)
+            jsonschema.validate(instance=self.store, schema=schema)
+            return True
+        except jsonschema.ValidationError as e:
+            print(f"Error: Knowledge store fails schema validation. {e.message}")
+            return False
+
     def save(self):
-        """Saves the current state of the knowledge store."""
-        # PATCH: Added setdefault to prevent KeyError on older schemas
+        """Validates and saves the current state of the knowledge store."""
+        if not self._validate_store():
+            print("Save aborted due to validation failure.")
+            return
+
         self.store.setdefault("metadata", {})
         self.store["metadata"]["updated_at"] = utcnow_iso()
         json_dump_pretty(self.store, self.path)
 
-    def _find(self, collection_name: str, key: str, value: Any):
-        """Finds an item in a collection within the store."""
-        collection = self.store.get(collection_name, [])
-        for item in collection:
-            if item.get(key) == value:
+    def _find_item(self, **kwargs):
+        """Finds a knowledge item by arbitrary key-value pairs."""
+        for item in self.store.get("knowledge_items", []):
+            if all(item.get(key) == value for key, value in kwargs.items()):
                 return item
         return None
 
-    def _ingest_goal(self, frag):
-        p = frag["payload"]
-        existing = self._find("goals", "id", p["id"])
-        if frag["operation"] in ("add", "update"):
-            if existing: existing.update(p)
-            else: self.store["goals"].append(p)
-        elif frag["operation"] == "archive" and existing:
-            existing["status"] = "completed"
-            existing["completed_at"] = frag["timestamp"]
-        elif frag["operation"] == "delete" and existing:
-            self.store["goals"].remove(existing)
-
-    def _ingest_idea(self, frag):
-        p = frag["payload"]
-        existing = self._find("ideas", "id", p["id"])
-        if frag["operation"] in ("add", "update"):
-            if existing: existing.update(p)
-            else: self.store["ideas"].append(p)
-        elif frag["operation"] in ("archive", "delete") and existing:
-            existing["status"] = "archived" if frag["operation"] == "archive" else "deleted"
-
-    def _ingest_state(self, frag):
-        self.store["state"].update(frag["payload"])
-
-    def _append_history(self, frag):
-        max_entries = self.store.get("metadata", {}).get("retention_policy", {}).get("max_history_entries", 1000)
-        self.store["history"].append({
-            "entry_id": str(uuid4()),
-            "timestamp": frag["timestamp"],
-            "action": f"{frag['type']}:{frag['operation']}",
-            "fragment_id": frag.get("payload", {}).get("id"),
-            "summary": frag.get("summary", "")
-        })
-        # Trim history to the max retention length
-        self.store["history"] = self.store["history"][-max_entries:]
-
-    def ingest_fragment(self, fragment: dict):
+    def ingest_fragment(self, fragment: dict) -> bool:
         """
-        Ingests a single fragment to update the knowledge store.
+        Ingests a single fragment to add or update a knowledge item.
+        Returns True on success, False on failure.
         """
-        # PATCH: Added placeholders for future types to avoid warnings
-        route_map = {
-            "goal": self._ingest_goal,
-            "idea": self._ingest_idea,
-            "state": self._ingest_state,
-            "project": lambda s, f: None, # Placeholder
-            "memory": lambda s, f: None,  # Placeholder
-            "task": lambda s, f: None,    # Placeholder
-        }
+        operation = fragment.get("operation")
+        payload = fragment.get("payload")
+
+        if not (operation and payload and "id" in payload):
+            print(f"Warning: Invalid fragment format. Skipping: {fragment}")
+            return False
+
+        # Duplicate Guard: Check for existing topic/tag combo on 'add'
+        if operation == "add" and 'topic' in payload and 'tag' in payload:
+            if self._find_item(topic=payload['topic'], tag=payload['tag']):
+                print(f"Warning: Duplicate item with topic '{payload['topic']}' and tag '{payload['tag']}' already exists. Skipping add.")
+                return False
+
+        existing_item = self._find_item(id=payload["id"])
         
-        frag_type = fragment.get("type")
-        if frag_type in route_map:
-            route_map[frag_type](self, fragment)
-            self._append_history(fragment)
+        success = False
+        if operation in ("add", "update"):
+            if existing_item:
+                print(f"Updating item: {payload['id']}")
+                existing_item.update(payload)
+                success = True
+            else:
+                print(f"Adding new item: {payload['id']}")
+                self.store["knowledge_items"].append(payload)
+                success = True
+        elif operation == "delete" and existing_item:
+            print(f"Deleting item: {payload['id']}")
+            self.store["knowledge_items"].remove(existing_item)
+            success = True
         else:
-            print(f"Warning: Unknown fragment type '{frag_type}'. Skipping.")
+            print(f"Warning: Operation '{operation}' on item '{payload['id']}' could not be completed.")
+            success = False
+
+        # Operation Logging: Add an audit entry on success
+        if success:
+            self.store.setdefault("metadata", {}).setdefault("operation_log", []).append({
+                "timestamp": utcnow_iso(),
+                "operation": operation,
+                "item_id": payload["id"]
+            })
+        
+        return success
 
     def update_from_session(self, fragments: List[Dict]):
         """Public workflow to update the store from a list of session fragments."""
+        applied_count = 0
         for f in fragments:
-            self.ingest_fragment(f)
-        self.save()
-        print(f"Knowledge store updated with {len(fragments)} fragments and saved to {self.path}.")
+            if self.ingest_fragment(f):
+                applied_count += 1
+        
+        if applied_count > 0:
+            self.save()
+            print(f"Knowledge store updated with {applied_count} fragments and saved to {self.path}.")
+        else:
+            print("No new fragments were applied to the knowledge store.")
 
 # --- Example Usage ---
 if __name__ == '__main__':
-    # This demonstrates how the class would be used.
     ks = KnowledgeStore("Knowledge.json")
 
-    # Example fragment from a session
+    # Example fragment that aligns with the schema
     session_fragment_example = {
-      "type": "idea",
       "operation": "add",
       "payload": {
-        "id": "idea_new_scheduler_v2",
-        "text": "AI-driven retail schedule generator using PEG macros.",
-        "status": "active",
-        "origin": "20250730-042000",
-        "created_at": "2025-07-30T04:20:00-04:00",
-        "updated_at": "2025-07-30T04:20:00-04:00",
-        "tags": ["#PEG_Build"]
+        "id": str(uuid4()),
+        "topic": "New Test Topic from Script",
+        "tag": "#TESTING_SCRIPT",
+        "tier": "knowledge",
+        "content": "This is a new knowledge item added programmatically."
       },
-      "timestamp": "2025-07-30T04:20:00-04:00",
-      "session_id": "20250730-042000"
+      "timestamp": utcnow_iso()
     }
 
-    # Update the store with the new fragment
     ks.update_from_session([session_fragment_example])
