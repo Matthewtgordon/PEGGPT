@@ -28,6 +28,7 @@
       "repo": "string",
       "path": "string",
       "params": "object"
-    }
+    },
+    "defaults": {}
   }
 }
