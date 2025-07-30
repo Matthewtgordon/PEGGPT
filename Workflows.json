@@ -1,97 +1,18 @@
 {
-  "version": "v3.2.1",
-  "description": "PEG Workflows.json — Orchestrator/session flow, agent routing, DSL pathing, state sync",
+  "version": "3.3.2",
+  "description": "PEG Workflows — Defines the graph-based orchestration flows, agent roles, and state transitions for the PEG system.",
   "metadata": {
-    "updated_at": "2025-05-02T12:00:00-04:00",
+    "updated_at": "2025-07-30T03:05:00-04:00",
     "author": "PEG Orchestrator",
-    "consolidated": true
+    "source_of_truth": "This file defines the primary orchestration logic, intended to be interpreted by a graph-based engine like LangGraph."
   },
-  "session_bundle": "PEG_v3_agentic_tests",
   "core_agent": "PEG",
   "components": [
     "MacroSelector",
     "AutoTune",
-    "Bio Injection",
+    "BioInjection",
     "SessionSync",
     "PersistentMemoryIndex"
-  ],
-  "workflow_sequences": [
-    {
-      "name": "StandardPromptOrchestration",
-      "steps": [
-        "intake_objective",
-        "context_tag_scan",
-        "agent_init",
-        "macro_chain_build",
-        "run_macro_sequence",
-        "fallback_invoke_if_needed",
-        "test_review",
-        "wrap_export"
-      ]
-    },
-    {
-      "name": "MultiAgentCoordination",
-      "steps": [
-        "PEG_issues_directive",
-        "AGENT1_executes_task",
-        "AGENT2_validates_challenges",
-        "PEG_validates_confirms_or_redirects",
-        "log_to_Journal"
-      ]
-    },
-    {
-      "name": "ExpandedAgentOrchestration",
-      "steps": [
-        "PEG_receives_objective",
-        "ENGINEER_builds_macro",
-        "VALIDATOR_checks_schema_and_structure",
-        "SCORER_applies_scoring_rules",
-        "TESTER_triggers_edge_and_regression_tests",
-        "CHALLENGER_flags_errors_or_conflicts",
-        "PEG_reviews_final_output_or_reroutes",
-        "LOGGER_logs_all_events"
-      ]
-    }
-  ],
-  "dsl_paths": [
-    {
-      "from": "intake",
-      "to": "prep",
-      "trigger": "objective_identified"
-    },
-    {
-      "from": "prep",
-      "to": "build",
-      "trigger": "macros_initialized"
-    },
-    {
-      "from": "build",
-      "to": "review",
-      "trigger": "macro_chain_complete"
-    },
-    {
-      "from": "review",
-      "to": "export",
-      "trigger": "all_tests_passed"
-    },
-    {
-      "from": "review",
-      "to": "export",
-      "trigger": "fallback_invoked"
-    },
-    {
-      "from": "build",
-      "to": "tester",
-      "trigger": "expanded_flow_enabled"
-    },
-    {
-      "from": "tester",
-      "to": "challenger"
-    },
-    {
-      "from": "challenger",
-      "to": "review"
-    }
   ],
   "agent_roles": {
     "PEG": "Session orchestrator and final arbiter; controls fallback, confirms resolution, logs via LOGGER.",
@@ -99,21 +20,59 @@
     "VALIDATOR": "Validates prompt structure, schema conformance, DSL/JSON output per enforcement rules.",
     "CHALLENGER": "Stress-tests logic chains, triggers fallback if structural or logic flaws detected.",
     "LOGGER": "Audits file changes, macro mutations, agent actions, and scoring logs.",
-    "SCORER": "Scores outputs using clarity, format, obedience, and override compliance.",
-    "TESTER": "Injects regression and edge tests from suite; flags drift or invalid fallback."
+    "SCORER": "Scores outputs using the PromptScoreModel.",
+    "TESTER": "Injects regression and edge tests from the test suite."
+  },
+  "workflows": {
+    "StandardPromptOrchestration": {
+      "entry_point": "intake",
+      "graph": {
+        "intake": {
+          "agent": "PEG",
+          "action": "intake_objective",
+          "transitions": {
+            "objective_identified": "prep"
+          }
+        },
+        "prep": {
+          "agent": "PEG",
+          "action": "context_tag_scan",
+          "transitions": {
+            "context_ready": "build"
+          }
+        },
+        "build": {
+          "agent": "ENGINEER",
+          "action": "macro_chain_build",
+          "transitions": {
+            "build_complete": "review"
+          }
+        },
+        "review": {
+          "agent": "VALIDATOR",
+          "action": "test_review",
+          "transitions": {
+            "validation_passed": "export",
+            "validation_failed": "build"
+          }
+        },
+        "export": {
+          "agent": "PEG",
+          "action": "wrap_export",
+          "transitions": {
+            "__end__": "__end__"
+          }
+        }
+      }
+    }
   },
   "session_sync": {
     "enabled": true,
     "persistent_index": true,
-    "cross_session_memory": true,
-    "bio_sync": ["Bio_A", "Bio_B"]
+    "cross_session_memory": true
   },
   "fallback_behavior": {
     "on_error": "invoke_macro('reroute_fallback')",
     "on_agent_conflict": "PEG resolves, logs to Journal"
-  },
-  "revision": {
-    "last_updated": "2025-05-02T12:00:00-04:00",
-    "revision_tag": "05.02.v4A"
   }
 }
