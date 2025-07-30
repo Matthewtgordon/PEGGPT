@@ -1,102 +1,16 @@
-{
-  "version": "3.3.1",
-  "metadata": {
-    "created_at": "2024-04-27T01:40:00+00:00",
-    "updated_at": "2025-07-30T04:03:00-04:00",
-    "author": "PEG Orchestrator",
-    "consolidated": true
-  },
-  "knowledge_items": [
-    {
-      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-      "topic": "Prompt Structure Pattern",
-      "tag": "#PROMPT_STRUCTURE",
-      "tier": "knowledge",
-      "content": "All prompt builds use hybrid format: lead-in objective/context, then structured (JSON, code, or DSL) logic."
-    },
-    {
-      "id": "6c84fb90-12c4-11ef-9264-0242ac120002",
-      "topic": "Fetch System Cap",
-      "tag": "#FETCH_LIMIT",
-      "tier": "knowledge",
-      "content": "8K character cap for Fetch-based prompts; 2–3K for standard routines."
-    },
-    {
-      "id": "7f8b3c4a-12c4-11ef-9264-0242ac120002",
-      "topic": "Execution Flag Rule",
-      "tag": "#EMULATED_ONLY",
-      "tier": "enforcement",
-      "content": "Code blocks are emulated for logic/structure, not for direct execution."
-    },
-    {
-      "id": "8a7b3c4d-12c4-11ef-9264-0242ac120002",
-      "topic": "Project Tags",
-      "tag": "#PROJECT_TAGS",
-      "tier": "meta",
-      "content": "Tags enable recall triggers (PEG, Translator, DEV, AI, etc.)."
-    },
-    {
-      "id": "9b6b3c4e-12c4-11ef-9264-0242ac120002",
-      "topic": "Validation Rules",
-      "tag": "#PROMPT_VALIDATION",
-      "tier": "enforcement",
-      "content": "Prompt auto-cleanup, collapse, or reformat enforced at each multi-phase step."
-    },
-    {
-      "id": "ac5b3c4f-12c4-11ef-9264-0242ac120002",
-      "topic": "Common Folders",
-      "tag": "#FOLDER_MAP",
-      "tier": "meta",
-      "content": "Active context folders: Projects/Folder/DEV, Projects/Folder/PEG, etc."
-    },
-    {
-      "id": "bd4b3c50-12c4-11ef-9264-0242ac120002",
-      "topic": "Memory Testing Methodology",
-      "tag": "#MEMTEST_GUIDE",
-      "tier": "procedure",
-      "content": "Guides memory experiments and expected logic across session handoff."
-    },
-    {
-      "id": "c33b3c51-12c4-11ef-9264-0242ac120002",
-      "topic": "Timestamp Rule",
-      "tag": "#TIMESTAMP_ENFORCE",
-      "tier": "enforcement",
-      "content": "Enforces UTS #35 timestamp for all messages/files."
-    },
-    {
-      "id": "d22b3c52-12c4-11ef-9264-0242ac120002",
-      "topic": "Mutation Audit",
-      "tag": "#MUTATION_AUDIT",
-      "tier": "enforcement",
-      "content": "Every file and macro change must be logged for audit and rollback capability."
-    },
-    {
-      "id": "e11b3c53-12c4-11ef-9264-0242ac120002",
-      "topic": "PEG Format Exception",
-      "tag": "#PEG_FORMAT",
-      "tier": "knowledge",
-      "content": "PEG’s own system files are built using whatever structure provides best performance and precision—hybrid Promptable is NOT required for PEG self-bootstrapping. All user-facing outputs default to hybrid Promptable unless instructed otherwise."
-    },
-    {
-      "id": "f00b3c54-12c4-11ef-9264-0242ac120002",
-      "topic": "GitHub Bootstrapping",
-      "tag": "#GITHUB_BOOTSTRAP",
-      "tier": "meta",
-      "content": "PEG may load PromptEngineer.txt or system logic from GitHub if bootstrapping is enabled and session format is undefined."
-    },
-    {
-      "id": "0efb3c55-12c5-11ef-9264-0242ac120002",
-      "topic": "Cloud Recovery",
-      "tag": "#CLOUD_RECOVERY",
-      "tier": "safety",
-      "content": "In the event of memory loss or config corruption, PEG may reinitialize from any version-tagged PromptEngineer.txt stored in GitHub or in a local recovery bundle."
-    },
-    {
-      "id": "1deb3c56-12c5-11ef-9264-0242ac120002",
-      "topic": "Scoring System",
-      "tag": "#SCORING_RULES",
-      "tier": "evaluation",
-      "content": "Prompt outputs must be scored based on clarity, obedience, format, and override-respect. Scores are tracked per session and logged."
-    }
-  ]
-}
+Mixed‐zone timestamps
+
+created_at uses +00:00 (UTC)
+
+updated_at uses -04:00 (local)
+Both are valid ISO-8601; just confirm your analytics tolerate mixed zones.
+
+Empty operation_log
+The schema allows an empty array, but your ingestion script could append a log entry whenever it saves, e.g.
+
+json
+Copy
+Edit
+{ "timestamp": "...", "operation": "initial_load", "item_id": null }
+Character vs token cap
+The “Fetch System Cap” content says 8K character cap; elsewhere you reference an 8K token limit. Align wording if a hard limit is enforced.
