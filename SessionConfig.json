@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "session_type": "PEG",
   "mode": "Full",
   "tools_enabled": true,
@@ -53,8 +53,14 @@
     "N": 3,
     "epsilon": 0.02
   },
+  "graph_orchestrator": {
+    "enabled": false
+  },
+  "ci": {
+    "minimum_score": 0.80
+  },
   "schema_links": {
-    "knowledge.schematx.json": {
+    "knowledge.schema.json": {
       "applies_to": "Knowledge.json",
       "enforced_at": [
         "prep",
