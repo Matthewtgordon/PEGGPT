@@ -1,41 +1,58 @@
+#
+# PEG (Promptable Engineer GPT) Continuous Integration Workflow
+#
+# This workflow automates the validation, testing, and scoring of the PEG
+# repository on every push and pull request. It serves as a quality gate
+# to ensure that no broken or low-quality changes are merged.
+#
 name: PEG CI
+
+# Triggers the workflow on push or pull request events
 on: [push, pull_request]
+
 jobs:
   validate-test-score:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # Step 1: Check out the repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: Install dependencies
-        run: pip install jsonschema pytest
-        
-      # --- START OF FIX ---
-      - name: Clean up incorrect directory structure
+
+      # Step 3: Install necessary Python dependencies
+      - name: Install Dependencies
         run: |
-          if [ -d "tests/tests" ]; then
-            echo "Incorrect nested 'tests/tests' directory found. Moving contents up and removing."
-            mv tests/tests/* tests/
-            rmdir tests/tests
-          fi
-      # --- END OF FIX ---
-      
+          python -m pip install --upgrade pip
+          pip install jsonschema pytest
+
+      # Step 4: Validate the repository's file structure and JSON integrity
       - name: Validate Repository Structure
         run: python validate_repo.py
-        
+
+      # Step 5: Run the scoring model to evaluate prompt quality
+      # This step assumes run_scoring.py exists and functions correctly.
       - name: Run Scoring
         run: python run_scoring.py --model PromptScoreModel.json --out score.json
-        
+
+      # Step 6: Run the automated test suite and generate a JUnit XML report
+      # CORRECTION: Added --junitxml flag to generate a test report.
       - name: Run Tests
-        run: pytest -q tests/
-        
+        run: pytest --junitxml=test-results/results.xml tests/
+
+      # Step 7: Upload artifacts for debugging, even if previous steps fail
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: peg-artifacts
+          # CORRECTION: The path now correctly includes the generated test report directory.
           path: |
             score.json
-            test-results/*
+            test-results/
