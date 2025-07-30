@@ -1,15 +1,17 @@
 {
-"$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "PEG Knowledge Schema v2.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PEG Knowledge Schema v3.1",
   "description": "Defines the structure for the agent's persistent knowledge base, including metadata for auditing and versioning.",
-"type": "object",
-"properties": {
-"version": {
+  "type": "object",
+  "properties": {
+    "version": {
       "description": "Semantic version of the knowledge file.",
-"type": "string",
-      "pattern": "^v?\\d+\\.\\d+\\.\\d+$"
+      "type": "string",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "description": "A human-readable description of the file's purpose.",
+      "type": "string"
     },
     "metadata": {
       "description": "Contains metadata about the file, including update timestamps and an audit log.",
@@ -34,7 +36,7 @@
             "properties": {
               "timestamp": { "type": "string", "format": "date-time" },
               "operation": { "type": "string" },
-              "item_id": { "type": "string" }
+              "item_id": { "type": "string", "nullable": true }
             },
             "required": ["timestamp", "operation", "item_id"],
             "additionalProperties": false
@@ -42,21 +44,18 @@
         }
       },
       "required": ["updated_at", "operation_log"]
-},
-"knowledge_items": {
+    },
+    "knowledge_items": {
       "description": "A list of all the individual knowledge items.",
-"type": "array",
-"items": {
-"type": "object",
-"properties": {
-"id": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
             "description": "A unique identifier for the knowledge item.",
-"type": "string",
-"format": "uuid"
-},
-          "topic":   { "type": "string" },
-          "tag":     { "type": "string" },
-          "tier":    { "type": "string" },
+            "type": "string",
+            "format": "uuid"
+          },
           "topic": { "type": "string" },
           "tag": {
             "type": "string",
@@ -66,15 +65,13 @@
             "type": "string",
             "enum": ["knowledge", "enforcement", "meta", "procedure", "safety", "evaluation"]
           },
-"content": { "type": "string" }
-},
-        "required": ["id", "topic", "tag", "content"]
-        "required": ["id", "topic", "tag", "content"],
+          "content": { "type": "string" }
+        },
+        "required": ["id", "topic", "tag", "tier", "content"],
         "additionalProperties": false
-}
-}
-},
-  "required": ["version", "knowledge_items"]
-  "required": ["version", "metadata", "knowledge_items"],
+      }
+    }
+  },
+  "required": ["version", "description", "metadata", "knowledge_items"],
   "additionalProperties": false
 }
