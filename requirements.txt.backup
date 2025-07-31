@@ -1,4 +1,4 @@
-# Requirements.txt
+#
 # Python dependencies required for running the PEG project's
 # validation, testing, and scoring scripts.
 # This file is used by the CI/CD workflow.
