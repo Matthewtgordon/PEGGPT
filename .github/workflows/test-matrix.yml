@@ -1,0 +1,24 @@
+name: test-matrix
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        optional: [false, true]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          if [ "${{ matrix.optional }}" = "true" ]; then pip install chromadb || true; fi
+      - name: Run tests
+        run: pytest -q
