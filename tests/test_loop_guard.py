@@ -13,9 +13,9 @@ def test_loop_guard_triggers_on_repeat_with_no_improvement():
     """
     # Simulate a history where 'macro_A' is repeated 3 times with no real progress
     history = [
-        {'macro': 'macro_A', 'score': 0.70},
-        {'macro': 'macro_A', 'score': 0.71}, # Improvement is <= epsilon
-        {'macro': 'macro_A', 'score': 0.71}  # No improvement
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.70},
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.71}, # Improvement is <= epsilon
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.71}  # No improvement
     ]
     
     # Use default N=3 and epsilon=0.02
@@ -27,9 +27,9 @@ def test_loop_guard_does_not_trigger_with_improvement():
     sufficient score improvement.
     """
     history = [
-        {'macro': 'macro_A', 'score': 0.70},
-        {'macro': 'macro_A', 'score': 0.73}, # Improvement > epsilon
-        {'macro': 'macro_A', 'score': 0.74}
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.70},
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.73}, # Improvement > epsilon
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.74}
     ]
     
     assert detect_loop(history, N=3, epsilon=0.02) is False
@@ -40,9 +40,9 @@ def test_loop_guard_does_not_trigger_on_different_macros():
     macros are used.
     """
     history = [
-        {'macro': 'macro_A', 'score': 0.70},
-        {'macro': 'macro_B', 'score': 0.70},
-        {'macro': 'macro_A', 'score': 0.70}
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.70},
+        {'node': 'build', 'macro': 'macro_B', 'score': 0.70},
+        {'node': 'build', 'macro': 'macro_A', 'score': 0.70}
     ]
     
     assert detect_loop(history, N=3, epsilon=0.02) is False
