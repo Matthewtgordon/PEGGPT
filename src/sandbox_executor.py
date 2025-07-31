@@ -20,8 +20,11 @@ class SandboxExecutor:
         self.logger = logging.getLogger(__name__)
 
     def _limit_resources(self) -> None:
+        import sys
+        import resource
         resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_time, self.max_cpu_time))
-        resource.setrlimit(resource.RLIMIT_AS, (self.max_memory, self.max_memory))
+        if sys.platform != "darwin":
+            resource.setrlimit(resource.RLIMIT_AS, (self.max_memory, self.max_memory))
 
     def run(self, command: str, timeout: int = 10) -> subprocess.CompletedProcess:
         """Run a shell command inside the sandbox."""
