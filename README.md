@@ -189,3 +189,18 @@ Are read by the orchestrator and can be updated by src/knowledge_update.py.
 CI Workflow (.github/workflows/peg-ci.yml) (The Quality Gate)
 Uses requirements.txt to set up its environment.
 Runs validate_repo.py to check the integrity of all other files.
+
+## Plugin Development Guide
+Describe plugins in `src/plugin_manager.py` and register them via entry points under the namespaces defined in `config/plugins.json`.
+
+## Connector Development Guide
+Connectors inherit from `BaseConnector` and implement `connect`, `_query`, and `disconnect`. See examples in `src/connectors/`.
+
+## Security Best Practices
+Use the `SandboxExecutor` for running untrusted code and keep API keys in environment variables. Limit resources and prefer least privilege.
+
+## Memory System Usage
+`MemoryManager` provides short-term buffers and long-term summaries. Use task or agent identifiers as namespaces.
+
+## Troubleshooting Guide
+If tests fail or plugins do not load, run `pytest -q` and ensure your environment variables are set. Use `scripts/setup_dev_environment.sh` to prepare a clean environment.
