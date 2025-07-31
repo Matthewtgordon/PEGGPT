@@ -35,7 +35,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         if [ "${{ matrix.include-optional }}" = "true" ]; then
-          pip install chromadb || true
         fi
 
     - name: Install dependencies (Windows)
@@ -44,7 +43,6 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         if ("${{ matrix.include-optional }}" -eq "true") {
-          pip install chromadb 2>$null || echo "ChromaDB installation failed, continuing..."
         }
 
     - name: Run tests
