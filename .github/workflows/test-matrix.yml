@@ -10,16 +10,15 @@ jobs:
   tests:
     runs-on: ${{ matrix.os }}
     strategy:
-      strategy:
-  fail-fast: false
-  matrix:
-    os: [ubuntu-latest, windows-latest, macos-latest]
-    python-version: ['3.9', '3.10', '3.11', '3.12']  # Remove 3.8
-    include-optional: [true, false]
-    exclude:
-      # Exclude Windows with optional deps due to syntax issues
-      - os: windows-latest
-        include-optional: true
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11', '3.12']  # Remove 3.8
+        include-optional: [true, false]
+        exclude:
+          # Exclude Windows with optional deps due to syntax issues
+          - os: windows-latest
+            include-optional: true
 
     steps:
     - uses: actions/checkout@v4
@@ -35,6 +34,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         if [ "${{ matrix.include-optional }}" = "true" ]; then
+          echo "Install optional dependencies here"
         fi
 
     - name: Install dependencies (Windows)
@@ -43,6 +43,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         if ("${{ matrix.include-optional }}" -eq "true") {
+          echo "Install optional dependencies here"
         }
 
     - name: Run tests
