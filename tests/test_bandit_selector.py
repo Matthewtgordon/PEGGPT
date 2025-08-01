@@ -17,14 +17,26 @@ def test_bandit_converges_on_best_macro():
 
     # Create a history where 'good_macro' has a 90% success rate
     # and 'bad_macro' has a 10% success rate.
+    # The bandit selector expects history entries with 'node' == 'build' and 'score' field
     history = []
-    for _ in range(100):
-        history.append({'macro': 'good_macro', 'reward': 1 if _ < 90 else 0})
-        history.append({'macro': 'bad_macro', 'reward': 1 if _ < 10 else 0})
+    for i in range(100):
+        # Good macro has 90% success rate (score >= 0.8)
+        history.append({
+            'node': 'build', 
+            'macro': 'good_macro', 
+            'score': 0.9 if i < 90 else 0.3
+        })
+        # Bad macro has 10% success rate (score >= 0.8)
+        history.append({
+            'node': 'build',
+            'macro': 'bad_macro', 
+            'score': 0.9 if i < 10 else 0.3
+        })
 
     # Run the selector many times to see which macro it prefers
     choices = []
     config = {"ci": {"minimum_score": 0.8}}
+    
     for _ in range(1000):
         choice = choose_macro(macros, history, config)
         choices.append(choice)
@@ -34,7 +46,7 @@ def test_bandit_converges_on_best_macro():
 
     # Assert that 'good_macro' was chosen significantly more often than 'bad_macro'
     assert counts['good_macro'] > counts['bad_macro']
-    assert counts['good_macro'] > 400  # Expect convergence
+    assert counts['good_macro'] > 800  # Expect strong convergence
 
 
 def test_bandit_explores_with_no_history():
