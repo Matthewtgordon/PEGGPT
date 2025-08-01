@@ -55,7 +55,7 @@ def validate_version_field(data: dict, filename: str):
     if 'version' not in data:
 
         print(f"[FAIL] Missing required 'version' field in {filename}.")
-=======
+
         print(f" Missing required 'version' field in {filename}.")
 
         return False
