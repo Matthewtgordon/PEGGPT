@@ -1,0 +1,63 @@
+{
+  "version": "{{ version | default('1.0.0') }}",
+  "description": "{{ description | default('Auto-generated workflow for ' + workflow_name) }}",
+  "metadata": {
+    "updated_at": "{{ timestamp | default('2025-08-01T00:00:00Z') }}",
+    "author": "{{ author | default('PEG Scaffolder') }}"
+  },
+  "agent_roles": {
+    "PEG": "Session orchestrator and final arbiter; controls fallback, confirms resolution, logs via LOGGER.",
+    "{{ primary_agent | upper }}": "{{ primary_agent_role | default('Primary agent for ' + workflow_name + ' workflow') }}"
+  },
+  "nodes": [
+    {
+      "id": "intake",
+      "label": "Intake",
+      "type": "start",
+      "agent": "PEG",
+      "action": "load_tags,init_context,assign_roles"
+    },
+    {
+      "id": "{{ workflow_name | lower }}_main",
+      "label": "{{ workflow_name }} Main",
+      "type": "process",
+      "agent": "{{ primary_agent | upper }}",
+      "action": "{{ main_action | default('execute_' + workflow_name | lower) }}"
+    },
+    {
+      "id": "review",
+      "label": "Review",
+      "type": "process",
+      "agent": "PEG",
+      "action": "score,validate"
+    },
+    {
+      "id": "export",
+      "label": "Export",
+      "type": "end",
+      "agent": "PEG",
+      "action": "export_results"
+    }
+  ],
+  "edges": [
+    {
+      "from": "intake",
+      "to": "{{ workflow_name | lower }}_main"
+    },
+    {
+      "from": "{{ workflow_name | lower }}_main",
+      "to": "review"
+    },
+    {
+      "from": "review",
+      "to": "export",
+      "condition": "score_passed"
+    },
+    {
+      "from": "review",
+      "to": "{{ workflow_name | lower }}_main",
+      "condition": "validation_failed"
+    }
+  ],
+  "entry_point": "intake"
+}

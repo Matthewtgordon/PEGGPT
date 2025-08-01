@@ -43,5 +43,5 @@ def detect_loop(history: List[Dict[str, Any]], N: int = 3, epsilon: float = 0.02
             return False  # Improvement was found, not a loop
 
     # If the same macro was used N times with no significant improvement, it's a loop
-    print(f"🔎 Loop Guard: Detected '{last_macro}' repeated {N} times without significant improvement.")
+    print(f"[LOOP] Loop Guard: Detected '{last_macro}' repeated {N} times without significant improvement.")
     return True

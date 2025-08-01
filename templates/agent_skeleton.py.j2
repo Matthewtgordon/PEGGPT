@@ -1,0 +1,123 @@
+"""
+Auto-generated agent skeleton for {{ agent_name }}.
+Part of the PEG multi-agent orchestration system.
+"""
+import json
+import logging
+from typing import Dict, Any, List
+from datetime import datetime
+
+class {{ agent_name }}Agent:
+    """
+    {{ agent_description | default('AI agent for ' + agent_name + ' operations') }}
+    
+    This agent integrates with the PEG orchestrator and follows the
+    standard agent protocol for state management and communication.
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        """Initialize the {{ agent_name }} agent with configuration."""
+        self.config = config
+        self.state = {
+            "initialized": True,
+            "last_action": None,
+            "history": []
+        }
+        logging.info("{{ agent_name }}Agent initialized")
+    
+    def execute(self, action: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Execute an action within the given context.
+        
+        Args:
+            action: The action to perform (e.g., '{{ primary_action | default('process') }}')
+            context: Current execution context from orchestrator
+            
+        Returns:
+            Dict containing result status and any output data
+        """
+        try:
+            self._log_action(action, context)
+            
+            if action == "{{ primary_action | default('process') }}":
+                return self._{{ primary_action | default('process') }}(context)
+            elif action == "validate":
+                return self._validate(context)
+            elif action == "cleanup":
+                return self._cleanup(context)
+            else:
+                return {
+                    "status": "error",
+                    "message": f"Unknown action: {action}",
+                    "agent": "{{ agent_name }}"
+                }
+                
+        except Exception as e:
+            logging.error(f"{{ agent_name }}Agent error in {action}: {e}")
+            return {
+                "status": "error",
+                "message": str(e),
+                "agent": "{{ agent_name }}"
+            }
+    
+    def _{{ primary_action | default('process') }}(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Main processing logic for {{ agent_name }}.
+        
+        TODO: Implement the core functionality for this agent.
+        """
+        # TODO: Add your agent's main logic here
+        result = {
+            "status": "success",
+            "message": "{{ agent_name }} processing completed",
+            "agent": "{{ agent_name }}",
+            "data": {
+                "processed_at": datetime.now().isoformat(),
+                "input_context": context
+            }
+        }
+        
+        self.state["last_action"] = "{{ primary_action | default('process') }}"
+        return result
+    
+    def _validate(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate the current state or output."""
+        # TODO: Add validation logic specific to {{ agent_name }}
+        return {
+            "status": "success",
+            "message": "{{ agent_name }} validation passed",
+            "agent": "{{ agent_name }}"
+        }
+    
+    def _cleanup(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Clean up resources and finalize state."""
+        # TODO: Add cleanup logic if needed
+        return {
+            "status": "success",
+            "message": "{{ agent_name }} cleanup completed",
+            "agent": "{{ agent_name }}"
+        }
+    
+    def _log_action(self, action: str, context: Dict[str, Any]):
+        """Log action execution for audit trail."""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "agent": "{{ agent_name }}",
+            "action": action,
+            "context_keys": list(context.keys()) if context else []
+        }
+        self.state["history"].append(log_entry)
+        logging.info(f"{{ agent_name }}Agent executing: {action}")
+    
+    def get_state(self) -> Dict[str, Any]:
+        """Return current agent state for orchestrator."""
+        return self.state.copy()
+    
+    def reset_state(self):
+        """Reset agent state for new session."""
+        self.state = {
+            "initialized": True,
+            "last_action": None,
+            "history": []
+        }
+        logging.info("{{ agent_name }}Agent state reset")

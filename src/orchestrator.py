@@ -108,7 +108,7 @@ class Orchestrator:
             logging.info("Loop detection result: %s", action_result)
 
         elif node['id'] == 'export':
-            logging.info("✅ Workflow complete. Exporting results.")
+            logging.info("[OK] Workflow complete. Exporting results.")
             action_result = "__end__"
 
         return {
@@ -181,7 +181,7 @@ def main():
     graph_file = Path("WorkflowGraph.json")
 
     if not config_file.exists() or not graph_file.exists():
-        print(f"❌ Error: Make sure SessionConfig.json and WorkflowGraph.json are present.")
+        print(f"[FAIL] Error: Make sure SessionConfig.json and WorkflowGraph.json are present.")
         return
 
     agent_orchestrator = Orchestrator(config_file, graph_file)
