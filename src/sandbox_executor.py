@@ -7,8 +7,13 @@ from __future__ import annotations
 import logging
 import subprocess
 import tempfile
-import resource
 from typing import Any
+
+try:
+    import resource
+    HAS_RESOURCE = True
+except ImportError:
+    HAS_RESOURCE = False
 
 
 class SandboxExecutor:
@@ -20,8 +25,11 @@ class SandboxExecutor:
         self.logger = logging.getLogger(__name__)
 
     def _limit_resources(self) -> None:
-        resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_time, self.max_cpu_time))
-        resource.setrlimit(resource.RLIMIT_AS, (self.max_memory, self.max_memory))
+        import sys
+        if HAS_RESOURCE:
+            resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_time, self.max_cpu_time))
+            if sys.platform != "darwin":
+                resource.setrlimit(resource.RLIMIT_AS, (self.max_memory, self.max_memory))
 
     def run(self, command: str, timeout: int = 10) -> subprocess.CompletedProcess:
         """Run a shell command inside the sandbox."""
@@ -31,7 +39,7 @@ class SandboxExecutor:
                     command,
                     shell=True,
                     cwd=tmpdir,
-                    preexec_fn=self._limit_resources,
+                    preexec_fn=self._limit_resources if HAS_RESOURCE else None,
                     capture_output=True,
                     text=True,
                     timeout=timeout,
