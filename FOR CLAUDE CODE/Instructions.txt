@@ -1,0 +1,107 @@
+# ✅ PEGGPT / PEGAGENT Development Checklist (Codex-Optimized)
+
+## PHASE 0: URGENT PLUGIN DEV (SHOPIFY & ETSY)
+- [X] Create `ShopifyPlugin` and `EtsyPlugin` (plugins/shopify.py, plugins/etsy.py)
+  - implement: `connect()`, `query()`, `disconnect()` (REST API)
+  - uses: `SHOPIFY_API_KEY`, `ETSY_API_KEY` (see Secrets section)
+- [X] Temporarily register plugin manually in `peg_gpt.py`
+  - until plugin discovery is implemented
+- [X] Add fallback logic inside each plugin (try/retry, timeout, return null)
+
+---
+
+## PHASE 1: FOUNDATION
+- [ ] Declarative Plugin & Connector Loader API
+  - dynamic discovery via Python `entry_points` (setuptools) or `@register_plugin` decorator
+  - define `BasePlugin`/`ConnectorBase` with `on_load()`, `execute()`/`query()`, `disconnect()`
+  - support plugin metadata via `plugin.yaml` or package entry_points
+
+- [ ] Plugin Workspace Isolation
+  - create `workspace_manager.py`
+  - isolate per-plugin in `./workspaces/{plugin_name}/`
+  - enforce path usage in plugins
+
+- [ ] Sandboxed Execution
+  - option A: Docker + gVisor
+  - option B: WASM (Pyodide, Wasmtime)
+  - implement: `sandbox_runner.py` → `run_in_sandbox(code: str)`
+  - spawn per plugin or per execution
+
+- [ ] Memory System (ChromaDB default)
+  - create `memory_store.py`
+  - short-term: rolling buffer (in-memory)
+  - long-term: `ChromaMemoryStore` with vector queries
+  - namespace: `memory.save(task_id, embedding, metadata)`
+
+---
+
+## PHASE 2: RELIABILITY
+- [ ] Fallback Chains
+  - create `fallbacks.py`
+  - define `FallbackPlan` → `retry`, `alt_plugin`, `HiTL`
+  - load from `fallbacks.yaml` per plugin/tool
+
+- [X] Human-in-the-Loop (HiTL) Guard
+  - ✅ already implemented via `approvals.json` and `RuntimeError("Awaiting human approval")`
+
+- [ ] Logging, Telemetry & Metrics
+  - replace `print()` with `logger = structlog.get_logger()`
+  - log: task start/stop, plugin use, errors, fallback events
+  - collect action-level metrics: counts, latency, success/failure rates
+  - metrics and benchmark output to `telemetry.jsonl`
+
+---
+
+## PHASE 3: SECURITY & GOVERNANCE
+- [ ] AuthN/AuthZ
+  - define `roles.json` → map roles → allowed plugins
+  - check role before execution: `authz.check_permission(task, plugin)`
+
+- [ ] Secret Management
+  - OPTION A: AWS Secrets Manager (`boto3.client("secretsmanager")`)
+  - OPTION B: local `.env` with fallback loader
+  - wrap with `get_secret(name)` in `secrets.py`
+
+- [ ] I/O Filtering & Prompt Protection
+  - sanitize inputs via `validators.py`
+  - detect and block prompt-injection, shell escapes, or malicious payloads
+  - scan outputs for secrets, credentials, or policy violations
+
+- [ ] Audit Log & Anomaly Detection
+  - file: `audit.log` (structured, append-only JSONL)
+  - record: timestamp, user, action, plugin, parameters, outcome
+  - integrate anomaly detection or alerting hooks for abnormal patterns
+
+---
+
+## PHASE 4: EXTENSIBILITY
+- [ ] Public Plugin SDK
+  - dir: `/plugin_sdk/`
+  - includes: `BasePlugin`, templates, sample plugin
+  - doc: `docs/plugin_dev.md`
+
+- [ ] Plugin Versioning
+  - plugin.yaml includes: `version`, `requires_core >= 1.0.0`
+  - check compatibility at load
+
+- [ ] Community Plugin Registry
+  - file: `registry.json`
+  - fields: `name`, `description`, `version`, `url`
+  - load from remote or local cache
+
+---
+
+## PHASE X: BUILDER GPT (CHATGPT-COMPATIBLE)
+- [ ] Fork `PEGGPT` into `BuilderGPT` branch
+- [ ] Copy: `peg_gpt.py`, base agent logic, minimal plugins
+- [ ] Strip: memory, plugins, sandbox → stub-only
+- [ ] Expose: `def run_prompt(user_input: str) -> str`
+- [ ] Option: make it callable from OpenAI Function interface
+
+---
+
+## GLOBAL
+- [ ] Add `config.json` for toggles (memory, sandbox, hitl)
+- [ ] Add `tests/` with mock plugins and CLI run examples
+- [ ] Track progress in `status_tracker.md`
+

@@ -73,17 +73,17 @@ def main():
         with model_path.open(encoding='utf-8') as f:
             model_data = json.load(f)
     except FileNotFoundError:
-        print(f"❌ Model file not found: {model_path}", file=sys.stderr)
+        print(f"[FAIL] Model file not found: {model_path}", file=sys.stderr)
         sys.exit(1)
     except json.JSONDecodeError as e:
-        print(f"❌ Invalid JSON in model file: {e}", file=sys.stderr)
+        print(f"[FAIL] Invalid JSON in model file: {e}", file=sys.stderr)
         sys.exit(1)
 
     # --- Load Agent Output ---
     # POLISH: Load the agent output from the file specified by --input.
     test_mode = False
     if not input_path.exists() or input_path.name.lower() == "readme.md":
-        print(f"⚠️  Input file not found: {input_path}. Using test mode.", file=sys.stderr)
+        print(f"[WARN] Input file not found: {input_path}. Using test mode.", file=sys.stderr)
         agent_output = {"test_mode": True, "content": "Test run"}
         test_mode = True
     else:
@@ -96,7 +96,7 @@ def main():
                     f.seek(0)  # Rewind file to read from the beginning
                     agent_output = {"content": f.read()}
         except OSError as e:
-            print(f"⚠️  Could not read input file: {e}. Using test mode.", file=sys.stderr)
+            print(f"[WARN] Could not read input file: {e}. Using test mode.", file=sys.stderr)
             agent_output = {"test_mode": True, "content": "Test run"}
             test_mode = True
 
@@ -106,20 +106,20 @@ def main():
     
     metrics_to_score = model_data.get('metrics', [])
     if not metrics_to_score:
-        print("❌ No 'metrics' array found in the model file.", file=sys.stderr)
+        print("[FAIL] No 'metrics' array found in the model file.", file=sys.stderr)
         sys.exit(1)
         
     # POLISH: Add a guard to ensure metric weights sum to 1.0.
     total_weight = sum(m.get('weight', 0) for m in metrics_to_score)
     if abs(total_weight - 1.0) > 1e-6:
-        print(f"⚠️  Total metric weights sum to {total_weight:.3f} (should be 1.0). Scores may be misleading.", file=sys.stderr)
+        print(f"[WARN] Total metric weights sum to {total_weight:.3f} (should be 1.0). Scores may be misleading.", file=sys.stderr)
 
     for metric in metrics_to_score:
         metric_name = metric.get('name')
         metric_weight = metric.get('weight')
 
         if not (metric_name and metric_weight is not None):
-            print(f"⚠️ Skipping invalid metric entry: {metric}", file=sys.stderr)
+            print(f"[WARN] Skipping invalid metric entry: {metric}", file=sys.stderr)
             continue
             
         if metric_name in METRIC_FUNCTIONS:
@@ -127,13 +127,13 @@ def main():
             calculated_scores[metric_name] = round(score, 4)
             total_score += score * metric_weight
         else:
-            print(f"⚠️ No calculation function found for metric: '{metric_name}'. Skipping.", file=sys.stderr)
+            print(f"[WARN] No calculation function found for metric: '{metric_name}'. Skipping.", file=sys.stderr)
 
     # --- Write Output and Check Against Threshold ---
     ci_config = model_data.get('ci', {})
     ci_minimum_score = ci_config.get('minimum_score')
     if ci_minimum_score is None:
-        print("❌ 'ci.minimum_score' not found in model file.", file=sys.stderr)
+        print("[FAIL] 'ci.minimum_score' not found in model file.", file=sys.stderr)
         sys.exit(1)
 
     output_data = {
@@ -147,9 +147,9 @@ def main():
         out_path.parent.mkdir(parents=True, exist_ok=True)
         with out_path.open('w', encoding='utf-8') as f:
             json.dump(output_data, f, indent=2)
-        print(f"✅ Scoring results saved to {out_path}")
+        print(f"[OK] Scoring results saved to {out_path}")
     except OSError as e:
-        print(f"❌ Could not write to {out_path}: {e}", file=sys.stderr)
+        print(f"[FAIL] Could not write to {out_path}: {e}", file=sys.stderr)
         sys.exit(1)
 
     if test_mode:
@@ -160,10 +160,10 @@ def main():
     # POLISH: Use the rounded score in the console message for clarity.
     final_score = output_data['total_weighted_score']
     if final_score < ci_minimum_score:
-        print(f"❌ CI Gate FAILED: Total score {final_score} is below threshold {ci_minimum_score}", file=sys.stderr)
+        print(f"[FAIL] CI Gate FAILED: Total score {final_score} is below threshold {ci_minimum_score}", file=sys.stderr)
         sys.exit(1)
     else:
-        print(f"✅ CI Gate PASSED: Total score {final_score} meets or exceeds threshold {ci_minimum_score}")
+        print(f"[OK] CI Gate PASSED: Total score {final_score} meets or exceeds threshold {ci_minimum_score}")
         sys.exit(0)
 
 

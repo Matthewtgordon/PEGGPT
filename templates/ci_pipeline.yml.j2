@@ -1,0 +1,212 @@
+name: {{ pipeline_name | default('PEG Validation Pipeline') }}
+
+on:
+  push:
+    branches: [ {{ main_branch | default('main') }}, {{ dev_branch | default('develop') }} ]
+  pull_request:
+    branches: [ {{ main_branch | default('main') }} ]
+  workflow_dispatch:
+
+jobs:
+  validate-repo:
+    runs-on: ubuntu-latest
+    name: Repository Validation
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '{{ python_version | default('3.9') }}'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install jsonschema{{ ' ' + additional_deps if additional_deps else '' }}
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Validate repository structure
+      run: python validate_repo.py
+    
+    - name: Validate JSON schemas
+      run: |
+        for schema in schemas/*.json; do
+          echo "Validating schema: $schema"
+          python -c "import json, jsonschema; schema=json.load(open('$schema')); jsonschema.Draft7Validator.check_schema(schema)"
+        done
+  
+  validate-templates:
+    runs-on: ubuntu-latest
+    name: Template Validation
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '{{ python_version | default('3.9') }}'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install jinja2 jsonschema{{ ' ' + additional_deps if additional_deps else '' }}
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Test template rendering
+      run: |
+        python -c "
+        from jinja2 import Environment, FileSystemLoader
+        import json
+        import os
+        
+        env = Environment(loader=FileSystemLoader('templates'))
+        
+        # Test plugin template
+        try:
+            template = env.get_template('plugin_skeleton.py.j2')
+            result = template.render(class_name='TestPlugin')
+            print('[OK] Plugin template renders successfully')
+        except Exception as e:
+            print(f'[FAIL] Plugin template error: {e}')
+            exit(1)
+        
+        # Test workflow template
+        try:
+            template = env.get_template('workflow_skeleton.json.j2')
+            result = template.render(workflow_name='Test', primary_agent='TEST')
+            json.loads(result)  # Validate JSON
+            print('[OK] Workflow template renders valid JSON')
+        except Exception as e:
+            print(f'[FAIL] Workflow template error: {e}')
+            exit(1)
+        
+        # Test agent template
+        try:
+            template = env.get_template('agent_skeleton.py.j2')
+            result = template.render(agent_name='Test')
+            print('[OK] Agent template renders successfully')
+        except Exception as e:
+            print(f'[FAIL] Agent template error: {e}')
+            exit(1)
+        
+        # Test test template
+        try:
+            template = env.get_template('test_skeleton.json.j2')
+            result = template.render(test_suite_name='Test')
+            json.loads(result)  # Validate JSON
+            print('[OK] Test template renders valid JSON')
+        except Exception as e:
+            print(f'[FAIL] Test template error: {e}')
+            exit(1)
+        "
+
+  test-scaffold-outputs:
+    runs-on: ubuntu-latest
+    name: Test Scaffold Outputs
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '{{ python_version | default('3.9') }}'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Test scaffold commands
+      run: |
+        # Test plugin scaffolding
+        peg scaffold-plugin TestPlugin
+        [ -f "plugins/testplugin.py" ] || (echo "[FAIL] Plugin not created" && exit 1)
+        python -m py_compile plugins/testplugin.py || (echo "[FAIL] Plugin syntax error" && exit 1)
+        echo "[OK] Plugin scaffold test passed"
+        
+        # Test workflow scaffolding
+        peg scaffold-workflow TestWorkflow
+        [ -f "TestWorkflowWorkflow.json" ] || (echo "[FAIL] Workflow not created" && exit 1)
+        python -c "import json; json.load(open('TestWorkflowWorkflow.json'))" || (echo "[FAIL] Workflow JSON invalid" && exit 1)
+        echo "[OK] Workflow scaffold test passed"
+        
+        # Test agent scaffolding
+        peg scaffold-agent TestAgent
+        [ -f "agents/testagent_agent.py" ] || (echo "[FAIL] Agent not created" && exit 1)
+        python -m py_compile agents/testagent_agent.py || (echo "[FAIL] Agent syntax error" && exit 1)
+        echo "[OK] Agent scaffold test passed"
+        
+        # Test test scaffolding
+        peg scaffold-test TestSuite
+        [ -f "TestSuiteTests.json" ] || (echo "[FAIL] Test suite not created" && exit 1)
+        python -c "import json; json.load(open('TestSuiteTests.json'))" || (echo "[FAIL] Test JSON invalid" && exit 1)
+        echo "[OK] Test scaffold test passed"
+
+  run-scoring:
+    runs-on: ubuntu-latest
+    name: Quality Scoring
+    if: ${{ '{{' }} github.event_name == 'pull_request' {{ '}}' }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python  
+      uses: actions/setup-python@v4
+      with:
+        python-version: '{{ python_version | default('3.9') }}'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run quality scoring
+      run: |
+        if [ -f "PromptScoreModel.json" ] && [ -f "run_scoring.py" ]; then
+          python run_scoring.py --model PromptScoreModel.json --input README.md --out score_results.json
+          echo "[OK] Quality scoring completed"
+        else
+          echo "[WARN] Scoring files not found, skipping quality gate"
+        fi
+    
+    - name: Upload scoring results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: scoring-results
+        path: score_results.json
+
+{% if custom_jobs %}
+{% for job in custom_jobs %}
+  {{ job.name }}:
+    runs-on: {{ job.runs_on | default('ubuntu-latest') }}
+    name: {{ job.display_name }}
+    {% if job.depends_on %}
+    needs: {{ job.depends_on | join(', ') }}
+    {% endif %}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    {% for step in job.steps %}
+    - name: {{ step.name }}
+      {% if step.uses %}
+      uses: {{ step.uses }}
+      {% if step.with %}
+      with:
+        {% for key, value in step.with.items() %}
+        {{ key }}: {{ value }}
+        {% endfor %}
+      {% endif %}
+      {% endif %}
+      {% if step.run %}
+      run: {{ step.run }}
+      {% endif %}
+    
+    {% endfor %}
+{% endfor %}
+{% endif %}

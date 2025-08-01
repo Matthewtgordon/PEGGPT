@@ -1,0 +1,53 @@
+{
+  "version": "{{ version | default('1.0.0') }}",
+  "description": "{{ description | default('Auto-generated test suite for ' + test_suite_name) }}",
+  "tests": [
+    {
+      "title": "{{ test_suite_name }} Basic Functionality",
+      "prompt": "{{ basic_test_prompt | default('Test basic functionality of ' + test_suite_name) }}",
+      "input": {
+        "context": "{{ basic_test_context | default('Basic test context for ' + test_suite_name) }}"
+      },
+      "expected_behavior": "{{ basic_expected_behavior | default('System should execute ' + test_suite_name + ' workflow successfully') }}",
+      "type": "example",
+      "id": "{{ test_suite_name | upper }}-001"
+    },
+    {
+      "title": "{{ test_suite_name }} Error Handling",
+      "prompt": "Test error conditions and recovery for {{ test_suite_name }}",
+      "input": {
+        "context": "Invalid or malformed input to trigger error handling",
+        "inject_error": true
+      },
+      "expected_behavior": "System should gracefully handle errors and provide meaningful feedback",
+      "type": "edge_case",
+      "id": "{{ test_suite_name | upper }}-002"
+    },
+    {
+      "title": "{{ test_suite_name }} Performance Validation",
+      "prompt": "Validate performance characteristics of {{ test_suite_name }}",
+      "input": {
+        "context": "Large or complex input to test performance",
+        "performance_test": true
+      },
+      "expected_behavior": "System should complete within acceptable time limits and resource usage",
+      "type": "performance",
+      "id": "{{ test_suite_name | upper }}-003"
+    }{% if custom_tests %},
+    {% for test in custom_tests %}
+    {
+      "title": "{{ test.title }}",
+      "prompt": "{{ test.prompt }}",
+      "input": {{ test.input | tojson }},
+      "expected_behavior": "{{ test.expected_behavior }}",
+      "type": "{{ test.type | default('custom') }}",
+      "id": "{{ test_suite_name | upper }}-{{ loop.index0 + 4 | string.zfill(3) }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}{% endif %}
+  ],
+  "metadata": {
+    "created_at": "{{ timestamp | default('2025-08-01T00:00:00Z') }}",
+    "author": "{{ author | default('PEG Test Scaffolder') }}",
+    "test_count": {{ (custom_tests | length + 3) if custom_tests else 3 }}
+  }
+}
