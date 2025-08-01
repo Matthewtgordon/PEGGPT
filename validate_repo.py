@@ -22,32 +22,52 @@ def validate_json(path: Path):
         load_json(path)
         return True
     except json.JSONDecodeError as e:
+
         print(f"[FAIL] JSON decode error in {path}: {e}")
+
+        print(f" JSON decode error in {path}: {e}")
+
         return False
 
 def validate_schema(data: dict, schema_path: Path):
     """Validates data against a JSON schema."""
     if not schema_path.exists():
+
         print(f"[WARN] Schema file not found: {schema_path}. Skipping schema validation.")
+
+        print(f" Schema file not found: {schema_path}. Skipping schema validation.")
+
         return True
     schema = load_json(schema_path)
     try:
         jsonschema.validate(instance=data, schema=schema)
         return True
     except jsonschema.ValidationError as e:
+
         print(f"[FAIL] Schema validation error for {schema_path.stem}: {e.message}")
+
+        print(f" Schema validation error for {schema_path.stem}: {e.message}")
+
         return False
 
 def validate_version_field(data: dict, filename: str):
     """Explicitly validates the 'version' field using a Semantic Versioning pattern."""
     if 'version' not in data:
+
         print(f"[FAIL] Missing required 'version' field in {filename}.")
+=======
+        print(f" Missing required 'version' field in {filename}.")
+
         return False
     
     version = data['version']
     semver_pattern = re.compile(r'^\d+\.\d+\.\d+$')
     if not isinstance(version, str) or not semver_pattern.match(version):
+
         print(f"[FAIL] Invalid SemVer format for 'version' in {filename}. Expected 'X.Y.Z', found '{version}'.")
+
+        print(f" Invalid SemVer format for 'version' in {filename}. Expected 'X.Y.Z', found '{version}'.")
+
         return False
     return True
 
@@ -77,7 +97,11 @@ def main():
     for filename in repo_files:
         path = Path(filename)
         if not path.exists():
+
             print(f"[FAIL] Missing required file: {filename}")
+
+            print(f" Missing required file: {filename}")
+
             all_valid = False
             continue
         
@@ -100,9 +124,15 @@ def main():
 
     print("\n--- Validation Complete ---")
     if all_valid:
+
         print("[OK] All repository configuration files are valid.")
     else:
         print("\n[FAIL] Repository validation failed. Please fix the errors listed above.")
+
+        print(" All repository configuration files are valid.")
+    else:
+        print("\n Repository validation failed. Please fix the errors listed above.")
+
         sys.exit(1)
 
 if __name__ == '__main__':
