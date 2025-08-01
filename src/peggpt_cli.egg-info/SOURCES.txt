@@ -1,0 +1,12 @@
+setup.py
+PEGGPT/src/connectors/__init__.py
+PEGGPT/src/connectors/base_connector.py
+PEGGPT/src/connectors/filesystem_connector.py
+PEGGPT/src/connectors/github_connector.py
+PEGGPT/src/connectors/openai_connector.py
+PEGGPT/src/peggpt_cli.egg-info/PKG-INFO
+PEGGPT/src/peggpt_cli.egg-info/SOURCES.txt
+PEGGPT/src/peggpt_cli.egg-info/dependency_links.txt
+PEGGPT/src/peggpt_cli.egg-info/entry_points.txt
+PEGGPT/src/peggpt_cli.egg-info/requires.txt
+PEGGPT/src/peggpt_cli.egg-info/top_level.txt
